@@ -3,8 +3,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { AuthContext } from "../../context/authContext";
 import "./rightBar.scss";
 import styled from "styled-components";
-import { useSelector } from 'react-redux'; // 1. Import useSelector
-import { selectUser } from "../../reducer/authReducer";  
+import { useSelector } from "react-redux"; // 1. Import useSelector
+import { selectUser } from "../../reducer/authReducer";
 
 // Styled Components for the buttons
 const BaseButton = styled.button`
@@ -84,7 +84,7 @@ const RightBar = () => {
         id: new Date().getTime(),
         name: inputName,
         img: "https://images.pexels.com/photos/4881619/pexels-photo-4881619.jpeg?auto=compress&cs=tinysrgb&w=1600",
-        headline: "This is a default headline for a new friend."
+        headline: "This is a default headline for a new friend.",
       };
       setOnlineFriends((prevFriends) => [...prevFriends, newFriend]);
       setInputName("");
@@ -109,7 +109,11 @@ const RightBar = () => {
                   <p className="mb-1" style={{ fontSize: "15px" }}>
                     {user.name}
                   </p>
-                  {user.headline && <p style={{ fontSize: "12px", color: "grey" }}>{user.headline}</p>}
+                  {user.headline && (
+                    <p style={{ fontSize: "12px", color: "grey" }}>
+                      {user.headline}
+                    </p>
+                  )}
                 </div>
                 <div className="mt-0">
                   <UnfollowButton onClick={() => handleUnfollow(user)}>

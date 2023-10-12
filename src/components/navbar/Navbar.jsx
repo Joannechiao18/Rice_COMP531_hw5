@@ -12,8 +12,9 @@ import Tooltip from "react-bootstrap/Tooltip";
 import AddReactionOutlinedIcon from "@mui/icons-material/AddReactionOutlined";
 import { FilterTermContext } from "../../context/FilterTermContext";
 import styled from "styled-components";
-import { useSelector } from "react-redux";
-import { selectUser } from "../../reducer/authReducer";  
+import { useSelector, useDispatch } from "react-redux";
+import { logout } from "../../actions/authActions";
+import { selectUser } from "../../reducer/authReducer";
 
 const UpdateButton = styled.button`
   background-color: #938eef;
@@ -51,6 +52,7 @@ const Navbar = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleInputChange = (e) => {
     setSearchTerm(e.target.value);
@@ -67,6 +69,15 @@ const Navbar = () => {
   const handleUpdateHeadline = (newHeadline) => {
     setUserHeadline(newHeadline);
     setShowDropdown(false);
+  };
+
+  //const history = useHistory();
+
+  const handleLogout = () => {
+    // Your logout logic here
+
+    dispatch(logout());
+    navigate("/login");
   };
 
   return (
@@ -154,7 +165,8 @@ const Navbar = () => {
               </Dropdown.Item>
               <Dropdown.Item
                 className="d-flex justify-content-center align-items-center"
-                href="/login"
+                //href="/login"
+                onClick={() => handleLogout()}
               >
                 <LogoutOutlinedIcon style={{ marginRight: "5px" }} />
                 Logout

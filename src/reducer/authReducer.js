@@ -1,6 +1,6 @@
 // authReducer.js
-import { createReducer } from '@reduxjs/toolkit';
-import { login, register, logout } from '../actions/authActions';
+import { createReducer } from "@reduxjs/toolkit";
+import { login, register, logout } from "../actions/authActions";
 
 const initialState = {
   currentUser: null,
@@ -20,6 +20,8 @@ const authReducer = createReducer(initialState, {
     state.profilePic = action.payload.profilePic;
   },
   [logout]: (state) => {
+    localStorage.removeItem("persist:root");
+    localStorage.removeItem("user");
     state.currentUser = null;
     state.isLoggedIn = false;
   },

@@ -280,7 +280,7 @@ const Register = () => {
                     data-toggle="popover"
                     data-trigger="manual" // We'll handle the show/hide manually
                     data-content={userNameError}
-                    data-placement="right" 
+                    data-placement="top" 
                   />
               </div>
               <div className="mb-3">
@@ -294,7 +294,7 @@ const Register = () => {
                   data-toggle="popover-email"
                   data-trigger="manual"
                   data-content={emailError}
-                  data-placement="right"
+                  data-placement="top"
               />
               </div>
               <div className="mb-4">
@@ -308,7 +308,7 @@ const Register = () => {
                 data-toggle="popover-phone"
                 data-trigger="manual"
                 data-content={phoneError}
-                data-placement="right"
+                data-placement="top"
               />
               </div>
               <div className="mb-4">
@@ -323,7 +323,7 @@ const Register = () => {
                   data-toggle="popover-birthday"
                   data-trigger="manual"
                   data-content={birthdayError}
-                  data-placement="right"
+                  data-placement="top"
               />
               </div>
               <div className="mb-4">
@@ -337,7 +337,7 @@ const Register = () => {
                 data-toggle="popover-zipcode"
                 data-trigger="manual"
                 data-content={zipCodeError}
-                data-placement="right"
+                data-placement="top"
               />
               </div>
               <div className="mb-3">
@@ -351,7 +351,7 @@ const Register = () => {
                 data-toggle="popover-password"
                 data-trigger="manual"
                 data-content={passwordError}
-                data-placement="right"
+                data-placement="top"
               />
               </div>
               <div className="mb-3">
@@ -364,7 +364,7 @@ const Register = () => {
                 data-toggle="popover-confirmpassword"
                 data-trigger="manual"
                 data-content={confirmPasswordError}
-                data-placement="right"
+                data-placement="top"
               />
               </div>
               <div className="d-flex justify-content-center">
