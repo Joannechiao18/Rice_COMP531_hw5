@@ -1,10 +1,16 @@
-import React, { useState, useEffect, useContext } from "react";
-import "bootstrap/dist/css/bootstrap.min.css";
-import { AuthContext } from "../../context/authContext";
+// RightBar.js
+import React, { useEffect, useState } from "react";
 import "./rightBar.scss";
 import styled from "styled-components";
-import { useSelector } from "react-redux"; // 1. Import useSelector
+import { useSelector, useDispatch } from "react-redux";
 import { selectUser } from "../../reducer/authReducer";
+import {
+  addFollowedUser,
+  removeFollowedUser,
+  setFollowedUsers,
+} from "../../reducer/followedUsersReducer";
+import { selectFollowedUsers } from "../../reducer/followedUsersReducer";
+import { ConstructionOutlined } from "@mui/icons-material";
 
 // Styled Components for the buttons
 const BaseButton = styled.button`
@@ -41,90 +47,131 @@ const UnfollowButton = styled(BaseButton)`
 `;
 
 const RightBar = () => {
-  //const { currentUser } = useContext(AuthContext);
-  const currentUser = useSelector(selectUser); // Adjust this based on your Redux store structure
+  const currentUser = useSelector(selectUser);
   const [onlineFriends, setOnlineFriends] = useState([]);
+  const [newFollowers, setNewFollowers] = useState([]);
   const [inputName, setInputName] = useState("");
   const currentUserID = currentUser.id;
+  const dispatch = useDispatch();
+  const followedUsers = useSelector(selectFollowedUsers);
+
+  console.log("rightbar", RightBar);
 
   useEffect(() => {
-    if (currentUserID <= 10) {
-      fetch("https://jsonplaceholder.typicode.com/users")
-        .then((response) => response.json())
-        .then((data) => {
-          let followedUserIds;
+    const totalUsers = 10;
 
-          const totalUsers = 10;
+    if (currentUserID <= totalUsers) {
+      // Check if followedUsersFromRedux is empty
+      if (!followedUsers || followedUsers.length === 0) {
+        const initialFollowedUserIds = [
+          (currentUserID % totalUsers) + 1,
+          ((currentUserID + 1) % totalUsers) + 1,
+          ((currentUserID + 2) % totalUsers) + 1,
+        ];
 
-          followedUserIds = [
-            (currentUserID % totalUsers) + 1,
-            ((currentUserID + 1) % totalUsers) + 1,
-            ((currentUserID + 2) % totalUsers) + 1,
-          ];
+        fetch("https://jsonplaceholder.typicode.com/users")
+          .then((response) => response.json())
+          .then((data) => {
+            const initialFollowedUsers = data.filter((user) =>
+              initialFollowedUserIds.includes(user.id)
+            );
 
-          const followedUsers = data.filter((user) =>
-            followedUserIds.includes(user.id)
-          );
-          setOnlineFriends(followedUsers);
-        });
+            setOnlineFriends(initialFollowedUsers.map((user) => user.id));
+
+            dispatch(setFollowedUsers(initialFollowedUsers));
+          });
+      } else {
+        setOnlineFriends(followedUsers.map((user) => user.id));
+
+        // If followedUsers is not empty, dispatch it to Redux
+        console.log(followedUsers);
+        dispatch(setFollowedUsers(followedUsers));
+      }
     } else {
       setOnlineFriends([]);
     }
-  }, [currentUserID]);
+  }, [currentUserID, dispatch, followedUsers]);
 
   const handleUnfollow = (userToUnfollow) => {
+    dispatch(removeFollowedUser(userToUnfollow));
+
+    // Update the local states
     setOnlineFriends((prevFriends) =>
-      prevFriends.filter((friend) => friend.id !== userToUnfollow.id)
+      prevFriends.filter((friend) => friend !== userToUnfollow)
+    );
+    setNewFollowers((prevFollowers) =>
+      prevFollowers.filter((follower) => follower !== userToUnfollow)
     );
   };
 
-  const handleAddFriend = () => {
+  const handleAddFriend = async () => {
     if (inputName.trim() !== "") {
-      const newFriend = {
-        id: new Date().getTime(),
-        name: inputName,
-        img: "https://images.pexels.com/photos/4881619/pexels-photo-4881619.jpeg?auto=compress&cs=tinysrgb&w=1600",
-        headline: "This is a default headline for a new friend.",
-      };
-      setOnlineFriends((prevFriends) => [...prevFriends, newFriend]);
-      setInputName("");
+      try {
+        const response = await fetch(
+          `https://jsonplaceholder.typicode.com/users?name=${inputName}`
+        );
+        const newUser = await response.json();
+
+        if (newUser && newUser.length > 0) {
+          const userWithHeadline = {
+            ...newUser[0],
+            headline: "This is a default headline for a new friend.",
+          };
+          setNewFollowers((prevFollowers) => [
+            ...prevFollowers,
+            userWithHeadline,
+          ]);
+          dispatch(addFollowedUser(userWithHeadline));
+          setInputName("");
+        } else {
+          alert("User not found.");
+        }
+      } catch (error) {
+        alert("There was an error fetching the user. Please try again.");
+      }
     }
   };
+
+  const allFriends = [...onlineFriends, ...newFollowers];
 
   return (
     <div className="rightBar d-flex flex-column p-2 bg-light border-left">
       <div className="customContainer">
         <h5 className="customTitle text-muted mb-3">Online Friends</h5>
-        {onlineFriends.map((user) => (
-          <div className="mb-3 border-bottom pb-3" key={user.id}>
-            <div className="d-flex">
-              <img
-                src="https://images.pexels.com/photos/4881619/pexels-photo-4881619.jpeg?auto=compress&cs=tinysrgb&w=1600"
-                alt=""
-                className="rounded-circle mr-2"
-                style={{ width: "40px", height: "40px" }}
-              />
-              <div>
+        {allFriends.map((userId) => {
+          const user = followedUsers.find((u) => u.id === userId); // Get the entire user object
+
+          if (!user) {
+            return null; // Return null if no user is found, or you can provide a default value or some error handling
+          }
+
+          return (
+            <div className="mb-3 border-bottom pb-3" key={userId}>
+              <div className="d-flex">
+                <img
+                  src="https://images.pexels.com/photos/4881619/pexels-photo-4881619.jpeg?auto=compress&cs=tinysrgb&w=1600"
+                  alt=""
+                  className="rounded-circle mr-2"
+                  style={{ width: "40px", height: "40px" }}
+                />
                 <div>
-                  <p className="mb-1" style={{ fontSize: "15px" }}>
-                    {user.name}
-                  </p>
-                  {user.headline && (
-                    <p style={{ fontSize: "12px", color: "grey" }}>
-                      {user.headline}
+                  <div>
+                    <p className="mb-1" style={{ fontSize: "15px" }}>
+                      {user.username} {/* Use Redux data */}
                     </p>
-                  )}
-                </div>
-                <div className="mt-0">
-                  <UnfollowButton onClick={() => handleUnfollow(user)}>
-                    Unfollow
-                  </UnfollowButton>
+                  </div>
+                  <div className="mt-0">
+                    <UnfollowButton onClick={() => handleUnfollow(user)}>
+                      {" "}
+                      {/* Pass the entire user object */}
+                      Unfollow
+                    </UnfollowButton>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
-
+          );
+        })}
         <h5 className="customTitle text-muted mb-3 mt-4">Add New Friend</h5>
         <div className="mb-3 d-flex">
           <input
@@ -135,11 +182,10 @@ const RightBar = () => {
             className="form-control mr-2"
             style={{ height: "30px", borderRadius: "20px" }}
           />
-          <AddButton onClick={() => handleAddFriend()}>Add</AddButton>
+          <AddButton onClick={handleAddFriend}>Add</AddButton>
         </div>
       </div>
     </div>
   );
 };
-
 export default RightBar;

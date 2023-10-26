@@ -16,7 +16,6 @@ import Profile from "./pages/profile/Profile";
 import "./style.scss";
 import { useState, useContext } from "react";
 import { DarkModeContext } from "./context/darkModeContext";
-import { AuthContext } from "./context/authContext";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { createGlobalStyle } from "styled-components";
 import { FilterTermContext } from "./context/FilterTermContext";
@@ -90,7 +89,6 @@ const CheckLogin = ({ children }) => {
 
 function App() {
   const { currentUser } = useSelector((state) => state.auth);
-  //const { currentUser, setCurrentUser} = useContext(AuthContext);
   const { darkMode } = useContext(DarkModeContext);
   const [filterTerm, setFilterTerm] = useState("");
 
@@ -99,29 +97,13 @@ function App() {
       <Router>
         <Routes>
           {/* Unprotected Routes */}
-          <Route
-            path="login"
-            element={
-              <CheckLogin>
-                <Login />
-              </CheckLogin>
-            }
-          />
-          <Route
-            path="register"
-            element={
-              <CheckLogin>
-                <Register />
-              </CheckLogin>
-            }
-          />
+          <Route path="login" element={<Login />} />
+          <Route path="register" element={<Register />} />
 
           {/* Protected Routes */}
           <Route
             path="/"
-            element={
-              currentUser ? <ProtectedRoute /> : <Navigate to="/login" />
-            }
+            element={currentUser ? <Layout /> : <Navigate to="/login" />}
           >
             <Route index element={<Home />} />
             <Route path="profile/:id" element={<Profile />} />

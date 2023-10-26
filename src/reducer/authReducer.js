@@ -22,6 +22,7 @@ const authReducer = createReducer(initialState, {
   [logout]: (state) => {
     localStorage.removeItem("persist:root");
     localStorage.removeItem("user");
+    localStorage.removeItem("userHeadline");
     state.currentUser = null;
     state.isLoggedIn = false;
   },

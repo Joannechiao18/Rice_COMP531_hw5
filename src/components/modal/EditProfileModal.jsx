@@ -96,7 +96,7 @@ const EditProfileModal = ({ isOpen, onRequestClose, user, onUpdate }) => {
     onRequestClose();
   };
 
-  const checkUserName = (inputValue) => {
+  /*const checkUserName = (inputValue) => {
     if (!/^[a-z]*$/.test(inputValue[0])) {
       setUserNameError("Must start with lower case.");
       $('[data-toggle="popover-username"]')
@@ -111,7 +111,7 @@ const EditProfileModal = ({ isOpen, onRequestClose, user, onUpdate }) => {
       setUserNameError("");
       $('[data-toggle="popover-username"]').popover("hide");
     }
-  };
+  };*/
 
   const checkEmail = (emailValue) => {
     if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(emailValue)) {
@@ -165,9 +165,9 @@ const EditProfileModal = ({ isOpen, onRequestClose, user, onUpdate }) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
 
-    if (name === "username") {
+    /*if (name === "username") {
       checkUserName(value);
-    }
+    }*/
     if (name === "email") {
       checkEmail(value);
     }
@@ -185,10 +185,15 @@ const EditProfileModal = ({ isOpen, onRequestClose, user, onUpdate }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!userNameError && !emailError && !phoneError && !zipCodeError && !passwordError) {
+    if (
+      //!userNameError &&
+      !emailError &&
+      !phoneError &&
+      !zipCodeError &&
+      !passwordError
+    ) {
       onUpdate(formData);
     }
-    
   };
 
   return (
@@ -204,7 +209,7 @@ const EditProfileModal = ({ isOpen, onRequestClose, user, onUpdate }) => {
       <h2>Edit Profile</h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
-          <label htmlFor="username" className="form-label">
+          {/*<label htmlFor="username" className="form-label">
             Username
           </label>
           <input
@@ -217,7 +222,7 @@ const EditProfileModal = ({ isOpen, onRequestClose, user, onUpdate }) => {
             data-toggle="popover-username"
             data-content={userNameError}
             data-placement="top"
-          />
+  />*/}
         </div>
         <div className="mb-3">
           <label htmlFor="email" className="form-label">

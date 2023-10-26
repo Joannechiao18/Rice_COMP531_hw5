@@ -6,10 +6,9 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import styled from "styled-components";
 import { AuthContext } from "../../context/authContext";
 import DatePicker from "react-datepicker";
-import { useDispatch } from 'react-redux';
-import { login } from '../../actions/authActions'; // Assuming you've stored it in an 'actions' folder
-import profilePic from '../../assets/profile.png';
-
+import { useDispatch } from "react-redux";
+import { login } from "../../actions/authActions"; // Assuming you've stored it in an 'actions' folder
+import profilePic from "../../assets/profile.png";
 
 // Styled Components for the buttons
 const LoginButton = styled.button`
@@ -47,7 +46,6 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
-
   const dispatch = useDispatch();
 
   const handleSubmit = async (e) => {
@@ -57,17 +55,20 @@ const Login = () => {
       `https://jsonplaceholder.typicode.com/users?username=${username}`
     );
     const users = await response.json();
+    console.log("Parsed Users:", users);
     const user = users[0];
 
     if (user && user.address.street === password) {
+      console.log("in");
       if (user) {
         // Transform the user object
         //user.name=user.username;
-        user.zipcode=user.address.zipcode;
+        user.zipcode = user.address.zipcode;
         user.password = user.address.street;
         delete user.address;
       }
-      dispatch(login({
+
+      const userDetails = {
         id: user.id,
         username: username,
         password: user.password,
@@ -76,7 +77,11 @@ const Login = () => {
         phone: user.phone,
         profilePic: profilePic,
         // ... other attributes
-      }));
+      };
+
+      console.log("before");
+      dispatch(login(userDetails));
+      console.log("after");
       navigate("/"); // Removed the duplicate navigate call
     } else {
       alert("Incorrect username or password");

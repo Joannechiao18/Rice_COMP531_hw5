@@ -5,11 +5,11 @@ import "./register.scss";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "react-datepicker/dist/react-datepicker.css";
 import styled from "styled-components";
-import $ from 'jquery';
-import 'bootstrap';
-import { useDispatch } from 'react-redux';
-import { register } from '../../actions/authActions';
-import profilePic from '../../assets/profile.png';
+import $ from "jquery";
+import "bootstrap";
+import { useDispatch } from "react-redux";
+import { register } from "../../actions/authActions";
+import profilePic from "../../assets/profile.png";
 
 const RegisterButton = styled.button`
   background-color: #938eef;
@@ -44,7 +44,7 @@ const Register = () => {
   const dispatch = useDispatch(); // <-- Use this to dispatch actions
   //const { login: handleRegister } = useContext(AuthContext); // Renamed for clarity
 
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [birthDate, setBirthDate] = useState("");
@@ -52,7 +52,7 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const [userNameError, setUserNameError] = useState('');
+  const [userNameError, setUserNameError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [phoneError, setPhoneError] = useState("");
   const [birthdayError, setBirthdayError] = useState("");
@@ -62,141 +62,176 @@ const Register = () => {
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
+  const [usernamesFromApi, setUsernamesFromApi] = useState([]);
 
+  useEffect(() => {
+    // Fetch the usernames from the provided API
+    fetch("https://jsonplaceholder.typicode.com/users")
+      .then((response) => response.json())
+      .then((data) => {
+        const fetchedUsernames = data.map((user) => user.username);
+        setUsernamesFromApi(fetchedUsernames);
+      })
+      .catch((error) => console.error("Error fetching usernames:", error));
+  }, []);
 
   const checkUserName = (inputValue) => {
     let errorFound = false;
 
-    if (!(/^[a-z]*$/.test(inputValue[0]))) {
-        setUserNameError('Must start with lower case.');
-        errorFound = true;
-    } else if (!(/^[a-z][A-Za-z0-9]*$/.test(inputValue))) {
-        setUserNameError('Account name can only contain numbers and characters.');
-        errorFound = true;
+    if (usernamesFromApi.includes(inputValue)) {
+      setUserNameError("Username already exists.");
+      errorFound = true;
+    } else if (!/^[a-z]*$/.test(inputValue[0])) {
+      setUserNameError("Must start with lower case.");
+      errorFound = true;
+    } else if (!/^[a-z][A-Za-z0-9]*$/.test(inputValue)) {
+      setUserNameError("Account name can only contain numbers and characters.");
+      errorFound = true;
     } else {
-        setUserNameError(''); 
+      setUserNameError("");
     }
 
     if (errorFound) {
-        $('[data-toggle="popover"]').popover('show');
+      $('[data-toggle="popover"]').popover("show");
     } else {
-        $('[data-toggle="popover"]').popover('hide');
+      $('[data-toggle="popover"]').popover("hide");
     }
   };
 
   const checkEmail = (emailValue) => {
-    if (!(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(emailValue))) {
-        setEmailError("Enter email in this format: a@b.co.");
-        $('[data-toggle="popover-email"]').popover('show');
+    if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(emailValue)) {
+      setEmailError("Enter email in this format: a@b.co.");
+      $('[data-toggle="popover-email"]').popover("show");
     } else {
-        setEmailError("");
-        $('[data-toggle="popover-email"]').popover('hide');
+      setEmailError("");
+      $('[data-toggle="popover-email"]').popover("hide");
     }
   };
 
   const checkPhone = (phoneValue) => {
-    if (!(/^\(?(\d{3})\)?[- ]?(\d{3})[- ]?(\d{4})$/.test(phoneValue))) {
+    if (!/^\(?(\d{3})\)?[- ]?(\d{3})[- ]?(\d{4})$/.test(phoneValue)) {
       setPhoneError("Enter phone in this format: 346-628-7744.");
-      $('[data-toggle="popover-phone"]').popover('show');
+      $('[data-toggle="popover-phone"]').popover("show");
     } else {
-      setPhoneError(""); 
-      $('[data-toggle="popover-phone"]').popover('hide');
+      setPhoneError("");
+      $('[data-toggle="popover-phone"]').popover("hide");
     }
   };
 
   const checkAge = (birthDateString) => {
     const today = new Date();
     const birthDate = new Date(birthDateString);
-    
-    const age = today.getFullYear() - birthDate.getFullYear() - 
-        (today.getMonth() < birthDate.getMonth() || 
-        (today.getMonth() === birthDate.getMonth() && today.getDate() < birthDate.getDate()) ? 1 : 0);
+
+    const age =
+      today.getFullYear() -
+      birthDate.getFullYear() -
+      (today.getMonth() < birthDate.getMonth() ||
+      (today.getMonth() === birthDate.getMonth() &&
+        today.getDate() < birthDate.getDate())
+        ? 1
+        : 0);
 
     if (age < 18) {
-        setBirthdayError("Age must be older than 18.");
+      setBirthdayError("Age must be older than 18.");
     } else {
-        setBirthdayError("");
+      setBirthdayError("");
     }
   };
 
   const checkZipCode = (zipValue) => {
-    if (!(/^\d{5}(-\d{4})?$/.test(zipValue))) {
-        setZipCodeError("Enter zip in this format: 77030 or 77030-1234.");
+    if (!/^\d{5}(-\d{4})?$/.test(zipValue)) {
+      setZipCodeError("Enter zip in this format: 77030 or 77030-1234.");
     } else {
-      setZipCodeError(""); 
+      setZipCodeError("");
     }
   };
 
   const checkPassword = (passwordValue) => {
-    if (passwordValue === '') {
-        setPasswordError("Enter password.");
+    if (passwordValue === "") {
+      setPasswordError("Enter password.");
     } else {
-        setPasswordError(""); 
+      setPasswordError("");
     }
   };
 
   const checkConfirmPassword = (confirmPassword) => {
     if (password !== confirmPassword) {
-        setConfirmPasswordError("Passwords do not match.");
+      setConfirmPasswordError("Passwords do not match.");
     } else {
-        setConfirmPasswordError(""); 
+      setConfirmPasswordError("");
     }
   };
 
   useEffect(() => {
-    // Initialize the Bootstrap popover 
-    $('[data-toggle="popover"], [data-toggle="popover-email"], [data-toggle="popover-phone"], [data-toggle="popover-birthday"], [data-toggle="popover-zipcode"]'
-      , '[data-toggle="popover-password"], [data-toggle="popover-confirmpassword"]').popover();
-    
+    // Initialize the Bootstrap popover
+    $(
+      '[data-toggle="popover"], [data-toggle="popover-email"], [data-toggle="popover-phone"], [data-toggle="popover-birthday"], [data-toggle="popover-zipcode"]',
+      '[data-toggle="popover-password"], [data-toggle="popover-confirmpassword"]'
+    ).popover();
+
     if (userNameError) {
-      $('[data-toggle="popover"]').popover('show');
+      $('[data-toggle="popover"]').popover("show");
     } else {
-      $('[data-toggle="popover"]').popover('hide');
+      $('[data-toggle="popover"]').popover("hide");
     }
-    
+
     if (emailError) {
-      $('[data-toggle="popover-email"]').popover('show');
+      $('[data-toggle="popover-email"]').popover("show");
     } else {
-      $('[data-toggle="popover-email"]').popover('hide');
+      $('[data-toggle="popover-email"]').popover("hide");
     }
-  
+
     if (phoneError) {
-      $('[data-toggle="popover-phone"]').popover('show');
+      $('[data-toggle="popover-phone"]').popover("show");
     } else {
-      $('[data-toggle="popover-phone"]').popover('hide');
+      $('[data-toggle="popover-phone"]').popover("hide");
     }
 
     if (birthdayError) {
-      $('[data-toggle="popover-birthday"]').popover('show');
+      $('[data-toggle="popover-birthday"]').popover("show");
     } else {
-      $('[data-toggle="popover-birthday"]').popover('hide');
+      $('[data-toggle="popover-birthday"]').popover("hide");
     }
 
     if (zipCodeError) {
-      $('[data-toggle="popover-zipcode"]').popover('show');
+      $('[data-toggle="popover-zipcode"]').popover("show");
     } else {
-      $('[data-toggle="popover-zipcode"]').popover('hide');
+      $('[data-toggle="popover-zipcode"]').popover("hide");
     }
 
     if (passwordError) {
-      $('[data-toggle="popover-password"]').popover('show');
+      $('[data-toggle="popover-password"]').popover("show");
     } else {
-      $('[data-toggle="popover-password"]').popover('hide');
+      $('[data-toggle="popover-password"]').popover("hide");
     }
 
     if (confirmPasswordError) {
-      $('[data-toggle="popover-confirmpassword"]').popover('show');
+      $('[data-toggle="popover-confirmpassword"]').popover("show");
     } else {
-      $('[data-toggle="popover-confirmpassword"]').popover('hide');
+      $('[data-toggle="popover-confirmpassword"]').popover("hide");
     }
-    
+
     return () => {
       // Hide and destroy popovers to avoid memory leaks
-      $('[data-toggle="popover"], [data-toggle="popover-email"], [data-toggle="popover-phone"], [data-toggle="popover-birthday"], [data-toggle="popover-zipcode"]'
-      , '[data-toggle="popover-password"], [data-toggle="popover-confirmpassword"]').popover('hide').popover('dispose');
+      $(
+        '[data-toggle="popover"], [data-toggle="popover-email"], [data-toggle="popover-phone"], [data-toggle="popover-birthday"], [data-toggle="popover-zipcode"]',
+        '[data-toggle="popover-password"], [data-toggle="popover-confirmpassword"]'
+      )
+        .popover("hide")
+        .popover("dispose");
     };
-  }, [username, email, phone, userNameError, emailError, phoneError, birthdayError, zipCodeError, passwordError, confirmPasswordError]);
-
+  }, [
+    username,
+    email,
+    phone,
+    userNameError,
+    emailError,
+    phoneError,
+    birthdayError,
+    zipCodeError,
+    passwordError,
+    confirmPasswordError,
+  ]);
 
   const handleNameChange = (e) => {
     const currentValue = e.target.value;
@@ -237,8 +272,15 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if(!userNameError && !emailError && !phoneError && !birthdayError
-      && !zipCodeError && !passwordError && !confirmPasswordError){
+    if (
+      !userNameError &&
+      !emailError &&
+      !phoneError &&
+      !birthdayError &&
+      !zipCodeError &&
+      !passwordError &&
+      !confirmPasswordError
+    ) {
       const user = {
         id: 11,
         username: username,
@@ -247,17 +289,17 @@ const Register = () => {
         //age: birthDate,
         zipcode: zipcode,
         password: password,
-        profilePic: profilePic 
+        profilePic: profilePic,
       };
 
-      dispatch(register(user)); // <-- Use Redux to store the user data
-      navigate('/');  
+      dispatch(register(user));
+      navigate("/");
     }
   };
 
   return (
     <div className="register d-flex align-items-center vh-100">
-      <div className="card mx-auto" style={{ maxWidth: '800px' }}>
+      <div className="card mx-auto" style={{ maxWidth: "800px" }}>
         <div className="row g-0">
           <div className="col-md-6 d-flex flex-column justify-content-center align-items-center p-5 text-white bg-primary">
             <h2 className="display-1 mb-4">Hello World.</h2>
@@ -271,20 +313,21 @@ const Register = () => {
 
             <form onSubmit={handleSubmit}>
               <div className="mb-3">
-              <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Username"
-                    value={username}
-                    onChange={handleNameChange}
-                    data-toggle="popover"
-                    data-trigger="manual" // We'll handle the show/hide manually
-                    data-content={userNameError}
-                    data-placement="top" 
-                  />
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Username"
+                  value={username}
+                  onChange={handleNameChange}
+                  data-toggle="popover"
+                  data-trigger="manual" // We'll handle the show/hide manually
+                  data-content={userNameError}
+                  data-placement="top"
+                  data-testid="username-input" // <-- Add this line here
+                />
               </div>
               <div className="mb-3">
-              <input
+                <input
                   id="email"
                   type="email"
                   className="form-control w-100"
@@ -295,77 +338,77 @@ const Register = () => {
                   data-trigger="manual"
                   data-content={emailError}
                   data-placement="top"
-              />
+                />
               </div>
               <div className="mb-4">
-              <input
-                id="phone"
-                type="text"
-                className="form-control w-100"
-                placeholder="Phone"
-                value={phone}
-                onChange={handlePhoneChange}
-                data-toggle="popover-phone"
-                data-trigger="manual"
-                data-content={phoneError}
-                data-placement="top"
-              />
+                <input
+                  id="phone"
+                  type="text"
+                  className="form-control w-100"
+                  placeholder="Phone"
+                  value={phone}
+                  onChange={handlePhoneChange}
+                  data-toggle="popover-phone"
+                  data-trigger="manual"
+                  data-content={phoneError}
+                  data-placement="top"
+                />
               </div>
               <div className="mb-4">
-              <input 
-                  type="date" 
-                  value={birthDate} 
-                  onChange={e => {
+                <input
+                  type="date"
+                  value={birthDate}
+                  onChange={(e) => {
                     setBirthDate(e.target.value);
                     checkAge(e.target.value);
-                }}
+                  }}
                   className="form-control"
                   data-toggle="popover-birthday"
                   data-trigger="manual"
                   data-content={birthdayError}
                   data-placement="top"
-              />
+                />
               </div>
               <div className="mb-4">
-              <input
-                id="zipcode"
-                type="text"
-                className="form-control w-100"
-                placeholder="Zipcode"
-                value={zipcode}
-                onChange={handleZipCodeChange}
-                data-toggle="popover-zipcode"
-                data-trigger="manual"
-                data-content={zipCodeError}
-                data-placement="top"
-              />
+                <input
+                  id="zipcode"
+                  type="text"
+                  className="form-control w-100"
+                  placeholder="Zipcode"
+                  value={zipcode}
+                  onChange={handleZipCodeChange}
+                  data-toggle="popover-zipcode"
+                  data-trigger="manual"
+                  data-content={zipCodeError}
+                  data-placement="top"
+                />
               </div>
               <div className="mb-3">
-              <input
-                id="pass"
-                type="password"
-                className="form-control w-100"
-                placeholder="Password"
-                value={password}
-                onChange={handlePasswordchange}
-                data-toggle="popover-password"
-                data-trigger="manual"
-                data-content={passwordError}
-                data-placement="top"
-              />
+                <input
+                  id="pass"
+                  type="password"
+                  className="form-control w-100"
+                  placeholder="Password"
+                  value={password}
+                  onChange={handlePasswordchange}
+                  data-toggle="popover-password"
+                  data-trigger="manual"
+                  data-content={passwordError}
+                  data-placement="top"
+                />
               </div>
               <div className="mb-3">
-              <input
-                type="password"
-                className="form-control w-100"
-                placeholder="Confirm Password"
-                value={confirmPassword}
-                onChange={handleConfirmPasswordchange}
-                data-toggle="popover-confirmpassword"
-                data-trigger="manual"
-                data-content={confirmPasswordError}
-                data-placement="top"
-              />
+                <input
+                  type="password"
+                  className="form-control w-100"
+                  placeholder="Confirm Password"
+                  value={confirmPassword}
+                  onChange={handleConfirmPasswordchange}
+                  data-toggle="popover-confirmpassword"
+                  data-trigger="manual"
+                  data-content={confirmPasswordError}
+                  data-placement="top"
+                />
               </div>
               <div className="d-flex justify-content-center">
                 <RegisterButton type="submit">REGISTER</RegisterButton>

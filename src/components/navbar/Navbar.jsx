@@ -48,7 +48,7 @@ const Navbar = () => {
   );
   const [showDropdown, setShowDropdown] = useState(false);
 
-  const { setFilterTerm } = useContext(FilterTermContext);
+  const { filterTerm, setFilterTerm } = useContext(FilterTermContext);
   const [searchTerm, setSearchTerm] = useState("");
 
   const navigate = useNavigate();

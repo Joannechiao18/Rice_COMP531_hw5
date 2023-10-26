@@ -11,9 +11,12 @@ import { useState } from "react";
 
 const Post = ({ post }) => {
   const [commentOpen, setCommentOpen] = useState(false);
-
   //TEMPORARY
   const liked = false;
+
+  const toggleComments = () => {
+    setCommentOpen((prevState) => !prevState);
+  };
 
   return (
     <div className="post">
@@ -26,7 +29,7 @@ const Post = ({ post }) => {
                 to={`/profile/${post.userId}`}
                 style={{ textDecoration: "none", color: "inherit" }}
               >
-                <span className="name">{post.name}</span>
+                <span className="name">{post.username}</span>
               </Link>
               <span className="date">1 min ago</span>
             </div>
@@ -34,7 +37,8 @@ const Post = ({ post }) => {
           <MoreHorizIcon />
         </div>
         <div className="content">
-          <p>{post.desc}</p>
+          <h2>{post.desc}</h2> {/* Displaying the title here */}
+          <p>{post.body}</p> {/* Displaying the body here */}
           <img src={post.img} alt="" />
         </div>
         <div className="info">
@@ -42,15 +46,10 @@ const Post = ({ post }) => {
             {liked ? <FavoriteOutlinedIcon /> : <FavoriteBorderOutlinedIcon />}
             12 Likes
           </div>
-          {/* 
-          <div className="item" onClick={() => setCommentOpen(!commentOpen)}>
+
+          <div className="item" onClick={toggleComments}>
             <TextsmsOutlinedIcon />
-            12 Comments
-          </div>
-          */}
-          <div className="item">
-            <TextsmsOutlinedIcon />
-            12 Comments
+            {commentOpen ? "Hide Comments" : "Show Comments"} (12)
           </div>
 
           <div className="item">

@@ -1,96 +1,96 @@
-import React, { useState, useEffect, useContext } from "react";
-import { AuthContext } from "../../context/authContext";
-import { FilterTermContext } from '../../context/FilterTermContext';
+// Posts.js
+import React, { useEffect, useContext } from "react";
 import "./posts.scss";
 import Post from "../post/Post";
 import Share from "../share/Share";
-import { useSelector } from 'react-redux'; // 1. Import useSelector
-import { selectUser } from "../../reducer/authReducer";  
-import { useDispatch } from 'react-redux';
-import { addPost, setPosts } from '../../actions/postsActions'; // Adjust this import based on your file structure
+import { useSelector, useDispatch } from "react-redux";
+import { selectUser } from "../../reducer/authReducer";
+import { addPost, setPosts } from "../../actions/postsActions";
 import { selectPosts } from "../../reducer/postsReducer";
-
+import { selectFollowedUsers } from "../../reducer/followedUsersReducer";
+import { FilterTermContext } from "../../context/FilterTermContext";
 
 const Posts = () => {
-  //const { currentUser } = useContext(AuthContext);
-  const currentUser = useSelector(selectUser); // Adjust this based on your Redux store structure
-  const posts = useSelector(selectPosts); // Adjust this based on your Redux store structure
+  const currentUser = useSelector(selectUser);
+  const posts = useSelector(selectPosts) || [];
   const dispatch = useDispatch();
-
-  //const [posts, setPosts] = useState([]);
-  const { filterTerm } = useContext(FilterTermContext);
+  const currentUserID = currentUser.id;
+  const followedUsers = useSelector(selectFollowedUsers);
+  const { filterTerm = "" } = useContext(FilterTermContext);
 
   // Filtering the posts based on the filterTerm
-  const filteredPosts = posts.filter(post => 
-    post.name.toLowerCase().includes(filterTerm.toLowerCase()) || 
-    post.desc.toLowerCase().includes(filterTerm.toLowerCase())
-  );
-
-  const currentUserID = currentUser.id;
+  const filteredPosts = posts.filter((post) => {
+    return (
+      (post.name
+        ? post.name.toLowerCase().includes(filterTerm.toLowerCase())
+        : false) ||
+      (post.desc
+        ? post.desc.toLowerCase().includes(filterTerm.toLowerCase())
+        : false)
+    );
+  });
 
   useEffect(() => {
-    if (currentUserID <= 10) {
-        const fetchUsers = async () => {
-            const response = await fetch("https://jsonplaceholder.typicode.com/users");
-            const users = await response.json();
-            const firstTenUsers = users.slice(0, 10);
+    const userImages = [
+      "https://images.pexels.com/photos/1036623/pexels-photo-1036623.jpeg?auto=compress&cs=tinysrgb&w=1600",
+      "https://images.pexels.com/photos/4881619/pexels-photo-4881619.jpeg?auto=compress&cs=tinysrgb&w=1600",
+      "https://images.pexels.com/photos/4881650/pexels-photo-4881650.jpeg?auto=compress&cs=tinysrgb&w=1600",
+    ];
 
-            // Assigning profile pictures to the first 10 users
-            const userImages = [
-                "https://images.pexels.com/photos/1036623/pexels-photo-1036623.jpeg?auto=compress&cs=tinysrgb&w=1600",
-                "https://images.pexels.com/photos/4881619/pexels-photo-4881619.jpeg?auto=compress&cs=tinysrgb&w=1600",
-                "https://images.pexels.com/photos/4881650/pexels-photo-4881650.jpeg?auto=compress&cs=tinysrgb&w=1600",
-            ];
-            firstTenUsers.forEach((user, idx) => {
-                user.profilePic = idx < 3 ? userImages[idx] : "https://via.placeholder.com/150"; // generic placeholder for the rest
-            });
+    // Extract IDs from the followedUsers objects
+    const followedUserIds = followedUsers
+      .filter((user) => user.id !== currentUserID)
+      .map((user) => user.id);
 
-            // Define the default text value
-            const defaultText = "This is the default text for every post.";
+    // Combine initial followedUserIds with the ones added from RightBar, and also include the current user
+    const allFollowedUserIds = [
+      ...new Set([...followedUserIds, currentUserID]),
+    ];
 
-            // Fetch the posts for each user
-            const userPostsPromises = firstTenUsers.map(async (user) => {
-                const res = await fetch(`https://jsonplaceholder.typicode.com/posts?userId=${user.id}`);
-                const userPosts = await res.json();
+    const fetchDetailsAndPosts = async () => {
+      const allPosts = [];
 
-                return userPosts.map((post, idx) => {
-                    let postImage = null;
+      // Loop through each user's ID in allFollowedUserIds and fetch their posts
+      for (let userId of allFollowedUserIds) {
+        // Fetch user data to get the user's name
 
-                    // Add images to the first three posts
-                    if (idx === 0) {
-                        postImage = "https://images.pexels.com/photos/1036623/pexels-photo-1036623.jpeg?auto=compress&cs=tinysrgb&w=1600";
-                    } else if (idx === 1) {
-                        postImage = "https://images.pexels.com/photos/4881619/pexels-photo-4881619.jpeg?auto=compress&cs=tinysrgb&w=1600";
-                    } else if (idx === 2) {
-                        postImage = "https://images.pexels.com/photos/4881650/pexels-photo-4881650.jpeg?auto=compress&cs=tinysrgb&w=1600";
-                    }
+        const userResponse = await fetch(
+          `https://jsonplaceholder.typicode.com/users/${userId}`
+        );
 
-                    // Add the default text to each post
-                    const postText = defaultText;
+        const clonedResponse = userResponse.clone();
 
-                    return {
-                        ...post,
-                        name: user.name,
-                        profilePic: user.profilePic,
-                        img: postImage,
-                        desc: postText, // Use the default text for all posts
-                    };
-                });
-            });
+        // For debugging
+        const responseText = await clonedResponse.text();
 
-            const allPosts = await Promise.all(userPostsPromises);
-            const flattenedPosts = allPosts.flat();
-            dispatch(setPosts(flattenedPosts));  // <-- Change this line
-        };
+        const userData = await userResponse.json();
 
-        fetchUsers();
-    } 
-}, [currentUserID]);
+        const response = await fetch(
+          `https://jsonplaceholder.typicode.com/posts?userId=${userId}`
+        );
+        const userPosts = await response.json();
+        // Add profilePic and user name details to each post
+        const postsWithDetails = userPosts.map((post) => {
+          return {
+            ...post,
+            profilePic: userImages[userId % userImages.length],
+            username: userData.username, // Use the name from the user data
+            desc: post.title,
+            body: post.body,
+          };
+        });
 
+        allPosts.push(...postsWithDetails);
+      }
+
+      dispatch(setPosts(allPosts));
+    };
+
+    fetchDetailsAndPosts();
+  }, [currentUserID, followedUsers]);
 
   const addNewPost = (newPost) => {
-    //setPosts([newPost, ...posts]);
-    dispatch(addPost(newPost));  // Dispatching the action
+    dispatch(addPost(newPost));
   };
 
   return (
