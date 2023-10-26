@@ -1,4 +1,3 @@
-// RightBar.js
 import React, { useEffect, useState } from "react";
 import "./rightBar.scss";
 import styled from "styled-components";
@@ -55,7 +54,7 @@ const RightBar = () => {
   const dispatch = useDispatch();
   const followedUsers = useSelector(selectFollowedUsers);
 
-  console.log("rightbar", RightBar);
+  const [message, setMessage] = useState(null);
 
   useEffect(() => {
     const totalUsers = 10;
@@ -123,11 +122,12 @@ const RightBar = () => {
           ]);
           dispatch(addFollowedUser(userWithHeadline));
           setInputName("");
+          setMessage(null);
         } else {
-          alert("User not found.");
+          setMessage("User not found.");
         }
       } catch (error) {
-        alert("There was an error fetching the user. Please try again.");
+        setMessage("There was an error fetching the user. Please try again.");
       }
     }
   };
@@ -137,6 +137,7 @@ const RightBar = () => {
   return (
     <div className="rightBar d-flex flex-column p-2 bg-light border-left">
       <div className="customContainer">
+        {message && <div className="alert alert-warning">{message}</div>}
         <h5 className="customTitle text-muted mb-3">Online Friends</h5>
         {allFriends.map((userId) => {
           const user = followedUsers.find((u) => u.id === userId); // Get the entire user object
@@ -177,7 +178,10 @@ const RightBar = () => {
           <input
             type="text"
             value={inputName}
-            onChange={(e) => setInputName(e.target.value)}
+            onChange={(e) => {
+              setInputName(e.target.value);
+              setMessage(null); // Clear the message when the user types
+            }}
             placeholder="Enter friend's name"
             className="form-control mr-2"
             style={{ height: "30px", borderRadius: "20px" }}
